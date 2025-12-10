@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import morgan from "morgan";
 import cors from "cors";
 import axios from "axios";
+import connectDB from "./configs/database";
+import authRoutes from "./routes/aRoutes";
 
 // CONFIG ENV
 dotenv.config();
@@ -15,6 +17,9 @@ const app = express();
 app.get("/", (req, res) => {
   res.send("<h1>Business-Management-System</h1>");
 });
+
+// ESTABLISHING DATABASE CONNECTION
+connectDB();
 
 // MIDDLEWARES
 app.use(
@@ -28,6 +33,9 @@ app.use(
 app.options("*", cors);
 app.use(express.json());
 app.use(morgan("dev"));
+
+// ROUTES
+app.use("/api/v1/auth", authRoutes);
 
 // Keeps Server Online
 function reloadWebsite() {
@@ -49,7 +57,7 @@ function reloadWebsite() {
 }
 
 // RUN LISTEN
-app.listen(PORT, () => {
+app.listen(process.env.PORT, () => {
   console.log(
     `Server is running on ${process.env.DEV_MODE} mode on port ${process.env.PORT}`
       .bgWhite.black
