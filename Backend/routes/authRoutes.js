@@ -2,8 +2,7 @@ import express from "express";
 import {
   registerController,
   loginController,
-} from "../controllers/aControl.js";
-import connectDB from "../configs/database.js";
+} from "../controllers/authController.js";
 
 // ROUTER OBJECT
 const router = express.Router();

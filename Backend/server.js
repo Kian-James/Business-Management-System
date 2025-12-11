@@ -4,8 +4,9 @@ import dotenv from "dotenv";
 import morgan from "morgan";
 import cors from "cors";
 import axios from "axios";
-import connectDB from "./configs/database";
-import authRoutes from "./routes/aRoutes";
+import connectDB from "./configs/database.js";
+import authRoutes from "./routes/authRoutes.js";
+import productRoutes from "./routes/productRoutes.js";
 
 // CONFIG ENV
 dotenv.config();
@@ -36,6 +37,7 @@ app.use(morgan("dev"));
 
 // ROUTES
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/products", productRoutes);
 
 // Keeps Server Online
 function reloadWebsite() {

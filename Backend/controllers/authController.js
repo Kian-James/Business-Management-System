@@ -1,6 +1,8 @@
-import userModel from "../models/userModel";
+import userModel from "../models/userModel.js";
 import JWT from "jsonwebtoken";
+import { hashPassword, comparePassword } from "../configs/authHelper.js";
 
+// REGISTER
 export const registerController = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -15,6 +17,10 @@ export const registerController = async (req, res) => {
     if (existingEmail) {
       return res.send({ success: false, message: "Email already registered." });
     }
+
+    // VALID ROLE
+    const allowedRoles = ["admin", "user"];
+    const finalRole = allowedRoles.includes(role) ? role : "user";
 
     // HANDLE DUPLICATE NAMES
     let finalName = name.trim();
@@ -32,7 +38,7 @@ export const registerController = async (req, res) => {
       name: finalName,
       email,
       password: hashedPassword,
-      role: Number(role),
+      role: finalRole,
     }).save();
 
     res.status(201).send({
@@ -59,54 +65,57 @@ export const registerController = async (req, res) => {
 export const loginController = async (req, res) => {
   try {
     const { email, password } = req.body;
+
     // VALIDATOR
     if (!email || !password) {
-      return res.status(404).send({
+      return res.status(400).send({
         success: false,
-        message: "Invalid Email or Password",
+        message: "Email and password are required.",
       });
     }
+
     const user = await userModel.findOne({ email });
     if (!user) {
       return res.status(404).send({
         success: false,
-        message: "Email is not Registered, Kindly Register",
+        message: "Email is not registered.",
       });
     }
+
     const match = await comparePassword(password, user.password);
     if (!match) {
-      return res.status(200).send({
+      return res.status(401).send({
         success: false,
-        message: "Invalid Password",
+        message: "Invalid password.",
       });
     }
+
     // GENERATE JWT
-    const token = await JWT.sign({ _id: user._id }, process.env.JWT_SECRET, {
+    const token = JWT.sign({ _id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
+
     res.status(200).send({
       success: true,
-      message: "Login Successfully",
+      message: "Login successful.",
       user: {
         name: user.name,
         email: user.email,
-        phone: user.phone,
-        address: user.address,
         role: user.role,
       },
       token,
     });
-  } catch (message) {
-    console.log(message);
+  } catch (error) {
+    console.error("Error during login:", error);
     res.status(500).send({
       success: false,
-      message: "message in Login",
-      message,
+      message: "Error in login.",
+      error,
     });
   }
 };
 
-// CHECK-EMAIL
+// CHECK EMAIL
 export const checkEmailController = async (req, res) => {
   try {
     const { email } = req.query;
@@ -115,5 +124,44 @@ export const checkEmailController = async (req, res) => {
   } catch (error) {
     console.error("Email check error:", error);
     res.status(500).json({ exists: false, error: error.message });
+  }
+};
+
+// UPDATE PASSWORD CONTROLLER
+export const updatePasswordController = async (req, res) => {
+  try {
+    const { accountId, newPassword } = req.body;
+
+    // VALIDATION
+    if (!accountId || !newPassword) {
+      return res
+        .status(400)
+        .send({ message: "Account ID and new password are required." });
+    }
+
+    // FIND USER
+    const user = await accountModel.findOne({ account_id: accountId });
+    if (!user) {
+      return res.status(404).send({ message: "User not found." });
+    }
+
+    // HASH NEW PASSWORD
+    const hashedPassword = await hashPassword(newPassword);
+
+    // UPDATE PASSWORD
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).send({
+      success: true,
+      message: "Password updated successfully!",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Error updating password.",
+      error,
+    });
   }
 };
