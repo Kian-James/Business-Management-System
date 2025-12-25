@@ -1,3 +1,5 @@
+import expenseModel from "../models/expenseModel.js";
+
 export const expenseController = async (req, res) => {
   try {
     const { expense_name, expense_cost, category, expense_date } = req.body;
@@ -57,6 +59,43 @@ export const getExpense = async (req, res) => {
       success: false,
       message: "Error while fetching expense",
       error,
+    });
+  }
+};
+
+export const deleteExpenseController = async (req, res) => {
+  try {
+    const { _id } = req.body;
+
+    // VALIDATION
+    if (!_id) {
+      return res.status(400).send({
+        success: false,
+        message: "Expense ID is required",
+      });
+    }
+
+    // DELETE EXPENSE
+    const deletedExpense = await expenseModel.findByIdAndDelete(_id);
+
+    if (!deletedExpense) {
+      return res.status(404).send({
+        success: false,
+        message: "Expense not found",
+      });
+    }
+
+    res.status(200).send({
+      success: true,
+      message: "Expense deleted successfully",
+      deletedExpense,
+    });
+  } catch (error) {
+    console.error("Error deleting expense:", error);
+    res.status(500).send({
+      success: false,
+      message: "Error deleting expense",
+      error: error.message,
     });
   }
 };

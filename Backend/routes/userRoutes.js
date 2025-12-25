@@ -1,32 +1,28 @@
 import express from "express";
 import {
-  deleteExpenseController,
-  expenseController,
-  getExpense,
-} from "../controllers/miscController.js";
-import {
   isAdmin,
   requireSignIn,
   isAdminOrEmployee,
   isEmployee,
 } from "../configs/authMiddleware.js";
+import {
+  deleteUserController,
+  getUser,
+} from "../controllers/userController.js";
 
 // ROUTER OBJECT
 const router = express.Router();
 
 // ROUTING
 // CREATE EXPENSE || METHOD POST
-router.post("/create-expense", requireSignIn, isAdmin, expenseController);
-
-// FETCH EXPENSE || METHOD GET
-router.post("/get-expense", requireSignIn, isAdmin, getExpense);
+router.post("/get-users", requireSignIn, isAdmin, getUser);
 
 // DELETE EXPENSE || METHOD DELETE
 router.delete(
   "/delete-expense/:id",
   requireSignIn,
   isAdmin,
-  deleteExpenseController
+  deleteUserController
 );
 
 export default router;
