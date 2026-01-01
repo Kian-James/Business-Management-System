@@ -7,6 +7,7 @@ import axios from "axios";
 import connectDB from "./configs/database.js";
 import authRoutes from "./routes/authRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
+import transactionRoutes from "./routes/transactionRoutes.js";
 import miscRoutes from "./routes/miscRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 
@@ -40,6 +41,7 @@ app.use(morgan("dev"));
 // ROUTES
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/products", productRoutes);
+app.use("/api/v1/transaction", transactionRoutes);
 app.use("/api/v1/miscellaneous", miscRoutes);
 app.use("/api/v1/user", userRoutes);
 
